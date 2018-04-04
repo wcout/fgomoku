@@ -8,6 +8,7 @@
 #include <FL/fl_ask.H>
 #include <string.h>
 #include <time.h>
+#include <cassert>
 
 struct rect
 {
@@ -46,13 +47,14 @@ public:
 	}
 	int handle( int e_ )
 	{
-		Inherited::handle( e_ );
+		int ret = Inherited::handle( e_ );
 		if ( e_ == FL_PUSH )
 		{
 			pt p(Fl::event_x(), Fl::event_y());
 			if ( _mouseFunc )
-			(*_mouseFunc)(this, Fl::event_button(), p);
+				(*_mouseFunc)(this, Fl::event_button(), p);
 		}
+		return ret;
 	}
 	void setDraw( void (*d_)(void) )
 	{
@@ -84,7 +86,8 @@ void (*TimerFunc)(void *);
 #define Black			FL_BLACK
 #define DarkRed		fl_darker(FL_RED)
 #define WatchCursor	FL_CURSOR_WAIT
-#define ArrowCursor	FL_CURSOR_ARROW
+//#define ArrowCursor	FL_CURSOR_ARROW
+#define ArrowCursor	FL_CURSOR_HAND
 #define White FL_WHITE
 
 
@@ -324,9 +327,9 @@ void drawboard(int ox, int oy)
 	fillrect(rect(ox - BORDERSIZE, oy - BORDERSIZE, 18 * GRIDSIZE + 2 * BORDERSIZE, 18 * GRIDSIZE + 2 * BORDERSIZE));
 	setcolor(Black);
 	for (i = ox; i <= ox + 18 * GRIDSIZE; i += GRIDSIZE)
-		drawline(pt(i, oy), pt(i, oy + 18 * GRIDSIZE + 1));
+		drawline(pt(i, oy), pt(i, oy + 18 * GRIDSIZE ));
 	for (i = oy; i <= oy + 18 * GRIDSIZE; i += GRIDSIZE)
-		drawline(pt(ox, i), pt(ox + 18 * GRIDSIZE + 1, i));
+		drawline(pt(ox, i), pt(ox + 18 * GRIDSIZE, i));
 }
 
 static void cb_to(void *d_)
@@ -461,6 +464,8 @@ void getstatpos(int x0, int y0, int dir)
 	case VERTI: dx = 0; dy = 1; break;
 	case LU_RO: dx = 1; dy = 1; break;
 	case LO_RU: dx = 1; dy = -1; break;
+	default:
+		assert(false);
 	}
 
 	anz = 1;
@@ -607,10 +612,10 @@ int evalmove(int x, int y, int c)
 
 void move_to(int x, int y, int color)
 {
-	if ( LastMove.x > 0 )
-		drawpiece(LastMove.x, LastMove.y, LastMove.color);
-	drawpiece(x, y, color);
-	drawdot(x, y, color);
+//	if ( LastMove.x > 0 )
+//		drawpiece(LastMove.x, LastMove.y, LastMove.color);
+//	drawpiece(x, y, color);
+//	drawdot(x, y, color);
 	LastMove.x = x;
 	LastMove.y = y;
 	LastMove.color = color;
@@ -619,7 +624,7 @@ void move_to(int x, int y, int color)
 	movelist[anz_moves].color = color;
 	anz_moves++;
 	anz_pieces[color]--;
-	drawtable(color);
+//	drawtable(color);
 	board[x][y] = color + 1; /* 0=empty, 1=player, 2=computer */
    Fl::first_window()->redraw();
 }
@@ -675,6 +680,10 @@ void drawpiecelist(void)
 	int i;
 	for (i = 0; i < anz_moves; i++)
 		drawpiece(movelist[i].x, movelist[i].y, movelist[i].color);
+	if ( LastMove.x > 0 )
+	{
+		drawdot(LastMove.x, LastMove.y, LastMove.color);
+	}
 }
 
 
@@ -697,6 +706,11 @@ void show( FWindow *w_)
 window newwindow(const char *title_, const rect &r_, int flags_ = 0 )
 {
 	FWindow *win = new FWindow ( r_.x, r_.y, r_.width, r_.height, title_ );
+	if ( flags_ & Modal )
+		win->set_modal();
+	if ( ( flags_ & Centered ) && Fl::first_window() )
+		win->position( Fl::first_window()->x() + ( Fl::first_window()->w() - r_.width ) / 2,
+	                  Fl::first_window()->y() + ( Fl::first_window()->h() - r_.height ) / 2 );
 	return win;
 }
 
