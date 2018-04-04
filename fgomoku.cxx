@@ -86,8 +86,8 @@ void (*TimerFunc)(void *);
 #define Black			FL_BLACK
 #define DarkRed		fl_darker(FL_RED)
 #define WatchCursor	FL_CURSOR_WAIT
-//#define ArrowCursor	FL_CURSOR_ARROW
-#define ArrowCursor	FL_CURSOR_HAND
+#define ArrowCursor	FL_CURSOR_ARROW
+//#define ArrowCursor	FL_CURSOR_HAND
 #define White FL_WHITE
 
 
@@ -399,22 +399,7 @@ void make_move(void *data)
 	settext(InfoText, "I'm thinking...");
 	setcursor(WatchCursor);
 	find_best_move(&best_move, 2);
-#if 0
-	getstatall();
-	while ( 1 )
-	{
-		int x, y;
 
-		x = rand() % 19;
-		y = rand() % 19;
-		if ( free_pos(x, y) )
-		{
-			delay(rand() % 3000 + 1000);
-			move_to(x, y, 1);
-			break;
-		}
-	}
-#endif
 	move_to(best_move.x, best_move.y, 1);
 	setcursor(ArrowCursor);
 	if ( checkfive(2) )
@@ -566,7 +551,7 @@ int eval(int c)
 				for (d = 0; d < 4; d++)
 				{
 					e += 50 * ( gstat[x][y].dir[d].is_anz == 2 && gstat[x][y].dir[d].poss_anz >= 5 );
-					e += 500 * ( gstat[x][y].dir[d].is_anz == 3 && gstat[x][y].dir[d].poss_anz >= 5 && (gstat[x][y].dir[d].freedom1 || gstat[x][y].dir[d].freedom1));
+					e += 200 * ( gstat[x][y].dir[d].is_anz == 3 && gstat[x][y].dir[d].poss_anz >= 5 && (gstat[x][y].dir[d].freedom1 || gstat[x][y].dir[d].freedom1));
 					e += 700 * ( gstat[x][y].dir[d].is_anz == 4  && (gstat[x][y].dir[d].freedom1 || gstat[x][y].dir[d].freedom2));
 					e += 5000 * ( gstat[x][y].dir[d].is_anz == 5 );
 					e += 20 * ( gstat[x][y].dir[d].poss_anz >= 5 );
@@ -595,6 +580,7 @@ int evalmove(int x, int y, int c)
 
 	my_strength = eval(c);
 	opp_strength = eval((c & 1) + 1);
+
 	board[x][y] = 0;
 
 	if ( ischecked(test_eval_flag) )
@@ -717,6 +703,7 @@ window newwindow(const char *title_, const rect &r_, int flags_ = 0 )
 label newlabel(const char *title_, const rect &r_, int flags_ = 0 )
 {
 	Fl_Box *win = new Fl_Box ( r_.x, r_.y, r_.width, r_.height, title_ );
+	win->box(FL_FLAT_BOX);
 	return win;
 }
 
