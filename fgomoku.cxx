@@ -575,13 +575,27 @@ int ischecked(Fl_Menu_Item *m_)
 int evalmove(int x, int y, int c)
 {
 	int my_strength, opp_strength;
+	int co = (c & 1) + 1;
+
 	board[x][y] = c;
 	getstatall();
 
 	my_strength = eval(c);
-	opp_strength = eval((c & 1) + 1);
+	opp_strength = eval(co);
+
+	int my_future_strength, opp_future_strength;
+	board[x][y] = co;
+	getstatall();
+
+	my_future_strength = eval(co);
+	opp_future_strength = eval(c);
 
 	board[x][y] = 0;
+
+	if ( my_future_strength > my_strength )
+		my_strength = my_future_strength;
+	if ( opp_future_strength > opp_strength )
+		opp_strength = opp_future_strength;
 
 	if ( ischecked(test_eval_flag) )
 	{
@@ -598,10 +612,6 @@ int evalmove(int x, int y, int c)
 
 void move_to(int x, int y, int color)
 {
-//	if ( LastMove.x > 0 )
-//		drawpiece(LastMove.x, LastMove.y, LastMove.color);
-//	drawpiece(x, y, color);
-//	drawdot(x, y, color);
 	LastMove.x = x;
 	LastMove.y = y;
 	LastMove.color = color;
@@ -610,7 +620,6 @@ void move_to(int x, int y, int color)
 	movelist[anz_moves].color = color;
 	anz_moves++;
 	anz_pieces[color]--;
-//	drawtable(color);
 	board[x][y] = color + 1; /* 0=empty, 1=player, 2=computer */
    Fl::first_window()->redraw();
 }
