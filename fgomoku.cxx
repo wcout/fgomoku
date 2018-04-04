@@ -1,3 +1,12 @@
+/*
+    A quick conversion of a gomoku program written in the year 2000
+    with GraphApp2 to FLTK in the year 2018.
+
+    I didn't want to touch the code more than necessary, so
+    I built a lot of wrapper functions that translate GraphApp
+    to FLKT. Only some too complicted things (like menus) have
+    been adapted.
+*/
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Double_Window.H>
@@ -27,8 +36,6 @@ struct pt
 	int x;
 	int y;
 };
-
-
 
 class FWindow : public Fl_Double_Window
 {
@@ -104,6 +111,7 @@ void (*TimerFunc)(void *);
 
 
 int GRIDSIZE = 40;
+int MENU_HEIGHT = 30;
 int BORDERSIZE;
 
 int OX;
@@ -139,8 +147,6 @@ typedef struct
 } dirpos;
 
 dirpos gstat[19][19];
-
-
 
 window MainWindow = 0;
 char board[19][19];
@@ -178,14 +184,13 @@ void redraw(Fl_Widget *wgt_)
 	wgt_->redraw();
 }
 
-
 void redim(int gridsize)
 {
 	GRIDSIZE = gridsize;
 	BORDERSIZE = GRIDSIZE;
 
 	OX = (2 * BORDERSIZE);
-	OY = (2 * BORDERSIZE) + 30;
+	OY = (2 * BORDERSIZE) + MENU_HEIGHT;
 
 	BOARDSIZE = (18 * GRIDSIZE);
 	RX = (OX + BOARDSIZE + BORDERSIZE);
@@ -244,7 +249,7 @@ void setcolor(int c_)
 
 void drawdot(int x, int y, int color)
 {
-	color = colors[color];
+//	color = colors[color];
 	if ( x < 19 )
 		x = OX + x * GRIDSIZE;
 	if ( y < 19 )
@@ -253,7 +258,6 @@ void drawdot(int x, int y, int color)
 	setcolor(DarkGrey);
 	fcircle(x, y, 2);
 }
-
 
 void drawpiece(int x, int y, int color)
 {
@@ -284,7 +288,7 @@ void drawpiece(int x, int y, int color)
 void drawtable(int c)
 {
 	/* 0=player, 1=computer */
-	int i, o, ox, oy;
+	int i, o;
 	if ( c )
 		o = -1;
 	else
@@ -297,8 +301,8 @@ void drawtable(int c)
 	fcircle(RX + PBOXSIZE, UC + PBOXSIZE * o, PBOXSIZE / 2 - PBOXSIZE / 7);
 	for (i = 0; i < anz_pieces[c]; i++)
 	{
-		ox = rand() % ((PBOXSIZE - PIECESIZE) / 4);
-		oy = rand() % ((PBOXSIZE - PIECESIZE) / 4);
+		int ox = rand() % ((PBOXSIZE - PIECESIZE) / 4);
+		int oy = rand() % ((PBOXSIZE - PIECESIZE) / 4);
 		if ( rand() % 2 )
 			ox = -ox;
 		if ( rand() % 2 )
@@ -519,7 +523,6 @@ int checkfive(int c)
 	return 0;
 }
 
-
 void getstatall(void)
 {
 	int x, y;
@@ -536,8 +539,6 @@ void getstatall(void)
 	}
 }
 
-
-
 int eval(int c)
 {
 	int x, y;
@@ -551,7 +552,7 @@ int eval(int c)
 				for (d = 0; d < 4; d++)
 				{
 					e += 50 * ( gstat[x][y].dir[d].is_anz == 2 && gstat[x][y].dir[d].poss_anz >= 5 );
-					e += 200 * ( gstat[x][y].dir[d].is_anz == 3 && gstat[x][y].dir[d].poss_anz >= 5 && (gstat[x][y].dir[d].freedom1 || gstat[x][y].dir[d].freedom1));
+					e += 200 * ( gstat[x][y].dir[d].is_anz == 3 && gstat[x][y].dir[d].poss_anz >= 5 && (gstat[x][y].dir[d].freedom1 || gstat[x][y].dir[d].freedom2));
 					e += 700 * ( gstat[x][y].dir[d].is_anz == 4  && (gstat[x][y].dir[d].freedom1 || gstat[x][y].dir[d].freedom2));
 					e += 5000 * ( gstat[x][y].dir[d].is_anz == 5 );
 					e += 20 * ( gstat[x][y].dir[d].poss_anz >= 5 );
@@ -607,9 +608,6 @@ int evalmove(int x, int y, int c)
 	return my_strength - 2 * opp_strength;
 }
 
-
-
-
 void move_to(int x, int y, int color)
 {
 	LastMove.x = x;
@@ -624,18 +622,15 @@ void move_to(int x, int y, int color)
    Fl::first_window()->redraw();
 }
 
-
 void mousebutton(control c, int buttons, const point& xy)
 {
-	int x, y;
-
 	if ( gameover )
 		return;
 
 	if ( xy.x >= OX - PIECESIZE / 2 && xy.y >= OY - PIECESIZE / 2 )
 	{
-		x = (xy.x - OX + PIECESIZE / 2) / GRIDSIZE;
-		y = (xy.y - OY + PIECESIZE / 2) / GRIDSIZE;
+		int x = (xy.x - OX + PIECESIZE / 2) / GRIDSIZE;
+		int y = (xy.y - OY + PIECESIZE / 2) / GRIDSIZE;
 		if ( x < 19 && y < 19 )
 		{
 			if ( !ComputerMoves )
@@ -681,7 +676,6 @@ void drawpiecelist(void)
 	}
 }
 
-
 //void redraw_window(window w, rect r)
 void redraw_window(void)
 {
@@ -690,7 +684,6 @@ void redraw_window(void)
 	drawtable(0);
 	drawtable(1);
 }
-
 
 void show( FWindow *w_)
 {
@@ -731,16 +724,15 @@ void info(const char *title, const char *text)
 	newlabel(text, rect(10, 10, 280, 180), Center + VCenter);
 	show(about);
 
-// askok(text};
+// askok(text);
 }
-
 
 //void about(menuitem m)
 void about(Fl_Widget *, void *)
 {
-	info("About Gomoku", "***** G O M O K U *****\nFive in a row\n\n(c) 2000\nChristian Grabner\n");
+	info("About Gomoku", "***** G O M O K U *****\nFive in a row\n\n(c) 2000\nChristian Grabner\n"
+	     "\nConvered to FLTK\n(c) 2018 wcout <wcout@@gmx.net>");
 }
-
 
 void exitapp()
 {
@@ -753,7 +745,6 @@ void quit(Fl_Widget *, void *)
 {
 	exitapp();
 }
-
 
 void newgame(void)
 {
@@ -775,12 +766,10 @@ void newgame(void)
 		prompt_move();
 }
 
-
 time_t currenttime()
 {
 	return time(0);
 }
-
 
 //void new_game(menuitem m)
 void new_game(Fl_Widget *, void *)
@@ -803,7 +792,6 @@ void change_colors(Fl_Widget *, void *)
 	redraw(MainWindow);
 }
 
-
 //void take_back(menuitem m)
 void take_back(Fl_Widget *, void *)
 {
@@ -817,7 +805,6 @@ void take_back(Fl_Widget *, void *)
 		redraw(MainWindow);
 	}
 }
-
 
 //void hint(menuitem m)
 void hint(Fl_Widget *, void *)
@@ -844,7 +831,6 @@ void check(Fl_Menu_Item *m_)
 {
 	m_->set();
 }
-
 
 void test_eval(menuitem m)
 {
@@ -873,7 +859,6 @@ void bigger(Fl_Widget *, void *)
 		redim(GRIDSIZE + 1);
 }
 
-
 void setredraw(FWindow *win_, void (*d_)(void) )
 {
 	win_->setDraw( d_ );
@@ -884,12 +869,10 @@ void setmousedown(FWindow *win_, void (*d_)(Fl_Widget *, int, const pt&) )
 	win_->setMouse( d_ );
 }
 
-
 void settimerfn(void (*d_)(void *), void *p_ = 0)
 {
 	TimerFunc = d_;
 }
-
 
 void mainloop()
 {
@@ -906,7 +889,7 @@ int main(void)
 
 	setredraw(MainWindow, redraw_window);
 
-	Fl_Menu_Bar *menubar = new Fl_Menu_Bar(0,0,MainWindow->w(),30);
+	Fl_Menu_Bar *menubar = new Fl_Menu_Bar(0,0,MainWindow->w(),MENU_HEIGHT);
 //	newmenubar(NULL);
 	Fl_Menu_Item menutable[] = {
 		{"File", 0, 0, 0, FL_SUBMENU },
