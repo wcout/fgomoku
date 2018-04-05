@@ -552,13 +552,15 @@ int eval(int c)
 				for (d = 0; d < 4; d++)
 				{
 					e += 50 * ( gstat[x][y].dir[d].is_anz == 2 && gstat[x][y].dir[d].poss_anz >= 5 );
-					e += 200 * ( gstat[x][y].dir[d].is_anz == 3 && gstat[x][y].dir[d].poss_anz >= 5 && (gstat[x][y].dir[d].freedom1 && gstat[x][y].dir[d].freedom2));
-					e += 700 * ( gstat[x][y].dir[d].is_anz == 4  && (gstat[x][y].dir[d].freedom1 || gstat[x][y].dir[d].freedom2));
+					e += 200 * ( gstat[x][y].dir[d].is_anz == 3 && gstat[x][y].dir[d].poss_anz >= 5 &&
+					             (gstat[x][y].dir[d].freedom1 && gstat[x][y].dir[d].freedom2) );
+					e += 700 * ( gstat[x][y].dir[d].is_anz == 4  &&
+					             (gstat[x][y].dir[d].freedom1 || gstat[x][y].dir[d].freedom2) );
 					e += 5000 * ( gstat[x][y].dir[d].is_anz == 5 );
 					e += 20 * ( gstat[x][y].dir[d].poss_anz >= 5 );
 					e += 5 * ( (gstat[x][y].dir[d].freedom1 != 0) + (gstat[x][y].dir[d].freedom2 != 0) );
-					e += 3 * (gstat[x][y].dir[d].freedom1 >= 4 && gstat[x][y].dir[d].freedom2 >= 4);
-					e += 70 * (x > 6 && x < 12 && y > 6 && y < 12);
+					e += 3 * ( gstat[x][y].dir[d].freedom1 >= 4 && gstat[x][y].dir[d].freedom2 >= 4 );
+					e += 70 * ( x > 6 && x < 12 && y > 6 && y < 12 );
 				}
 			}
 		}
